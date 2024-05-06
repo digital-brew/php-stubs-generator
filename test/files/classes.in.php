@@ -112,3 +112,45 @@ final class G
         return '';
     }
 }
+
+enum He
+{
+    /** doc */
+    case A;
+
+    /** doc */
+    case B;
+}
+
+enum Ie: string
+{
+    /** doc */
+    case A = 'a';
+
+    /** doc */
+    case B = 'b';
+}
+
+enum Je: string
+{
+    /** doc */
+    case A = 'a';
+
+    /** doc */
+    case B = 'b';
+
+    public function a(): string
+    {
+        return '';
+    }
+
+    protected function b(): string
+    {
+        return '';
+    }
+
+    private function c(): string
+    {
+        return '';
+    }
+}

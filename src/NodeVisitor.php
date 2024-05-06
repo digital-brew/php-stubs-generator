@@ -48,6 +48,8 @@ class NodeVisitor extends NodeVisitorAbstract
     /** @var bool */
     private $needsConstants;
     /** @var bool */
+    private $needsEnums;
+    /** @var bool */
     private $nullifyGlobals;
     /** @var bool */
     private $includeInaccessibleClassNodes;
@@ -89,6 +91,7 @@ class NodeVisitor extends NodeVisitorAbstract
         'traits' => [],
         'constants' => [],
         'globals' => [],
+        'enums' => [],
     ];
 
     /**
@@ -103,6 +106,7 @@ class NodeVisitor extends NodeVisitorAbstract
         $this->needsDocumentedGlobals = ($symbols & StubsGenerator::DOCUMENTED_GLOBALS) !== 0;
         $this->needsUndocumentedGlobals = ($symbols & StubsGenerator::UNDOCUMENTED_GLOBALS) !== 0;
         $this->needsConstants = ($symbols & StubsGenerator::CONSTANTS) !== 0;
+        $this->needsEnums = ($symbols & StubsGenerator::ENUMS) !== 0;
 
         $this->nullifyGlobals = !empty($config['nullify_globals']);
         $this->includeInaccessibleClassNodes = ($config['include_inaccessible_class_nodes'] ?? false) === true;
@@ -127,6 +131,7 @@ class NodeVisitor extends NodeVisitorAbstract
         if (($this->needsClasses && $node instanceof Class_)
             || ($this->needsInterfaces && $node instanceof Interface_)
             || ($this->needsTraits && $node instanceof Trait_)
+            || ($this->needsEnums && $node instanceof Stmt\Enum_)
         ) {
             // We'll need to parse all descendents of these nodes (if we plan to
             // include them in the stubs at all) so we get method, property, and
@@ -203,6 +208,7 @@ class NodeVisitor extends NodeVisitorAbstract
             || $node instanceof Interface_
             || $node instanceof Trait_
             || $node instanceof Const_
+            || $node instanceof Stmt\Enum_
             || (
                 $node instanceof Expression &&
                 $node->expr instanceof FuncCall &&
@@ -368,6 +374,11 @@ class NodeVisitor extends NodeVisitorAbstract
             return $this->needsTraits
                 && $this->count('traits', $fullyQualifiedName)
                 && !trait_exists($fullyQualifiedName);
+        }
+
+        if ($node instanceof Stmt\Enum_) {
+            return $this->needsEnums
+                && $this->count('enums', $fullyQualifiedName);
         }
 
         if ($this->needsConstants) {

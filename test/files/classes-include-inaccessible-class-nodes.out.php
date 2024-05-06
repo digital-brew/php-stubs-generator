@@ -100,3 +100,34 @@ final class G
     {
     }
 }
+
+enum He
+{
+    /** doc */
+    case A;
+    /** doc */
+    case B;
+}
+enum Ie : string
+{
+    /** doc */
+    case A = 'a';
+    /** doc */
+    case B = 'b';
+}
+enum Je : string
+{
+    /** doc */
+    case A = 'a';
+    /** doc */
+    case B = 'b';
+    public function a(): string
+    {
+    }
+    protected function b(): string
+    {
+    }
+    private function c(): string
+    {
+    }
+}

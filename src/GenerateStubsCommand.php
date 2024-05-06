@@ -34,6 +34,7 @@ class GenerateStubsCommand extends Command
         ['undocumented-globals', StubsGenerator::UNDOCUMENTED_GLOBALS],
         ['globals', StubsGenerator::GLOBALS],
         ['constants', StubsGenerator::CONSTANTS],
+        ['enums', StubsGenerator::ENUMS]
     ];
 
     /**
