@@ -22,6 +22,7 @@ use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\Trait_;
+use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
@@ -319,8 +320,10 @@ class NodeVisitor extends NodeVisitorAbstract
         }
 
         return array_merge(
-            $this->classLikeNamespaces,
-            $this->namespaces,
+            $this->mergeNamespaces(
+                ... $this->classLikeNamespaces,
+                ... $this->namespaces
+            ),
             $this->globalNamespace->stmts ? [$this->globalNamespace] : [],
             $this->globalExpressions ? [new Namespace_(null, $this->globalExpressions)] : []
         );
@@ -351,6 +354,10 @@ class NodeVisitor extends NodeVisitorAbstract
         $fullyQualifiedName = ($node instanceof Function_ || $node instanceof ClassLike)
             ? '\\' . ltrim("{$namespace}\\{$node->name}", '\\')
             : '';
+
+        if($node instanceof Use_) {
+            return true;
+        }
 
         if ($node instanceof Function_) {
             return $this->needsFunctions
@@ -518,5 +525,42 @@ class NodeVisitor extends NodeVisitorAbstract
             }
         }
         return $stmts;
+    }
+
+    /**
+     * @param Namespace_ $namespaces
+     * @return Namespace_[]
+     */
+    private function mergeNamespaces(... $namespaces) : array {
+        /** @var Namespace_[] $ret */
+        $ret = [];
+        foreach ($namespaces as $namespace) {
+            if(!$namespace->name instanceof Name){
+                $namespaceName = "__GLOBAL__!";
+            }else{
+                $namespaceName = $namespace->name->toString();
+            }
+            if(isset($ret[$namespaceName])){
+                $ret[$namespaceName]->stmts = array_merge(
+                    $ret[$namespaceName]->stmts, $namespace->stmts
+                );
+            } else {
+                $ret[$namespaceName] = $namespace;
+            }
+
+            usort($ret[$namespaceName]->stmts, function ($a, $b) {
+                if($a instanceof Use_ && !$b instanceof Use_){
+                    return -1;
+                }
+
+                if($b instanceof Use_ && !$a instanceof Use_){
+                    return 1;
+                }
+
+                return 0;
+            });
+        }
+
+        return array_values($ret);
     }
 }

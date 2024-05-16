@@ -47,6 +47,7 @@ class NodeVisitorTest extends TestCase
             'junk',
             'namespaces',
             'constants',
+            "phpdoc"
         ];
 
         $baseDir = __DIR__ . '/files/';
